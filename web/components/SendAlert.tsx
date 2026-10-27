@@ -37,7 +37,7 @@ export default function SendAlert() {
     setBusy(true);
     setMsg("");
     try {
-      const res = await api<{ id: string; notified: number }>("/api/alerts", {
+      const res = await api<{ id: string; notified: number }>("", {
         method: "POST",
         body: JSON.stringify({ lat: pos[0], lng: pos[1], description: desc }),
       });

@@ -91,7 +91,7 @@ export default function DetectorPanel() {
     }
     const photoUrl = await snapshot();
     try {
-      const res = await api<{ notified: number; filtered?: boolean }>("/api/alerts", {
+    const res = await api<{ notified: number; filtered?: boolean }>("/alerts", {
         method: "POST",
         body: JSON.stringify({
           lat: data[0].lat,

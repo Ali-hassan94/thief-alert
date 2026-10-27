@@ -22,7 +22,7 @@ export default function HeatmapPage() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        setItems(await api<AlertItem[]>("/api/alerts?days=30"));
+        setItems(await api<AlertItem[]>("?days=30"));
       } catch (e) {
         setError((e as Error).message);
       }

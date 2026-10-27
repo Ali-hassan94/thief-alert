@@ -17,7 +17,7 @@ export default function AlertsPage() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        setItems(await api<AlertItem[]>("/api/alerts"));
+        setItems(await api<AlertItem[]>(""));
       } catch (e) {
         setError((e as Error).message);
       }

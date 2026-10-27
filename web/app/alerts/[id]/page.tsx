@@ -27,7 +27,7 @@ export default function AlertDetailPage() {
 
   async function loadSightings() {
     try {
-      setSightings(await api<Sighting[]>(`/api/alerts/${id}/sightings`));
+      setSightings(await api<Sighting[]>(`/${id}/sightings`));
     } catch {}
   }
 
@@ -37,7 +37,7 @@ export default function AlertDetailPage() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        setAlert(await api<AlertItem>(`/api/alerts/${id}`));
+        setAlert(await api<AlertItem>(`/${id}`));
         loadSightings();
         timer = window.setInterval(loadSightings, 10000);
       } catch (e) {
@@ -50,7 +50,7 @@ export default function AlertDetailPage() {
 
   async function resolve() {
     try {
-      await api(`/api/alerts/${id}/resolve`, { method: "POST" });
+      await api(`/${id}/resolve`, { method: "POST" });
       setAlert((a) => (a ? { ...a, status: "resolved" } : a));
     } catch (e) {
       setError((e as Error).message);
@@ -59,8 +59,8 @@ export default function AlertDetailPage() {
 
   async function vote(v: "confirm" | "fake") {
     try {
-      await api(`/api/alerts/${id}/vote`, { method: "POST", body: JSON.stringify({ vote: v }) });
-      setAlert(await api<AlertItem>(`/api/alerts/${id}`));
+      await api(`/${id}/vote`, { method: "POST", body: JSON.stringify({ vote: v }) });
+      setAlert(await api<AlertItem>(`/${id}`));
     } catch (e) {
       setError((e as Error).message);
     }
@@ -69,7 +69,7 @@ export default function AlertDetailPage() {
   async function sendSighting() {
     if (!pending) return;
     try {
-      await api(`/api/alerts/${id}/sighting`, {
+      await api(`/${id}/sighting`, {
         method: "POST",
         body: JSON.stringify({ lat: pending[0], lng: pending[1] }),
       });

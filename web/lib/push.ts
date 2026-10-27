@@ -67,6 +67,6 @@ export async function showLocalTestNotification() {
   await reg.showNotification("🚨 Test Alert", {
     body: "Agar ye nazar aa raha hai to notification theek kaam kar rahi hai.",
     icon: "/icon-192.png",
-    vibrate: [500, 200, 500],
+    // vibrate: [500, 200, 500],
   });
 }

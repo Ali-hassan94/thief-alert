@@ -16,7 +16,7 @@ export default function GalleryPage() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        const all = await api<AlertItem[]>("/api/alerts?days=30");
+        const all = await api<AlertItem[]>("?days=30");
         setItems(all.filter((a) => a.photoUrl));
       } catch (e) {
         setError((e as Error).message);
