@@ -16,13 +16,23 @@ export default function GalleryPage() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        const all = await api<AlertItem[]>("?days=30");
+        const all = await api<AlertItem[]>("/alerts?days=30");
         setItems(all.filter((a) => a.photoUrl));
       } catch (e) {
         setError((e as Error).message);
       }
     })();
   }, [router]);
+
+  async function remove(id: string) {
+    if (!confirm("Ye tasveer aur alert delete karein?")) return;
+    try {
+      await api(`/alerts/${id}`, { method: "DELETE" });
+      setItems((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-gray-100 p-4">
@@ -35,10 +45,20 @@ export default function GalleryPage() {
         {items.length === 0 && !error && <p className="text-gray-500">Abhi koi tasveer nahi.</p>}
         <div className="grid grid-cols-2 gap-3">
           {items.map((a) => (
-            <Link key={a.id} href={`/alert/${a.id}`} className="block border rounded-xl overflow-hidden">
-              <img src={a.photoUrl!} alt="" className="w-full h-36 object-cover" />
-              <p className="text-xs text-gray-600 p-2">{new Date(a.createdAt).toLocaleString()}</p>
-            </Link>
+            <div key={a.id} className="border rounded-xl overflow-hidden">
+              <Link href={`/alert?id=${a.id}`} className="block">
+                <img src={a.photoUrl!} alt="" className="w-full h-36 object-cover" />
+                <p className="text-xs text-gray-600 p-2">{new Date(a.createdAt).toLocaleString()}</p>
+              </Link>
+              {a.mine && (
+                <button
+                  onClick={() => remove(a.id)}
+                  className="w-full text-xs text-red-600 py-2 border-t hover:bg-red-50"
+                >
+                  🗑️ Delete
+                </button>
+              )}
+            </div>
           ))}
         </div>
       </div>

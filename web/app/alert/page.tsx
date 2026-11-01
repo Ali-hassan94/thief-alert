@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -15,8 +15,8 @@ const TrackMap = dynamic(() => import("@/components/TrackMap"), {
 
 type Sighting = { lat: number; lng: number; createdAt: string };
 
-export default function AlertDetailPage() {
-  const { id } = useParams<{ id: string }>();
+function AlertDetail() {
+  const id = useSearchParams().get("id") ?? "";
   const router = useRouter();
   const [alert, setAlert] = useState<AlertItem | null>(null);
   const [error, setError] = useState("");
@@ -27,17 +27,18 @@ export default function AlertDetailPage() {
 
   async function loadSightings() {
     try {
-      setSightings(await api<Sighting[]>(`/${id}/sightings`));
+      setSightings(await api<Sighting[]>(`/alerts/${id}/sightings`));
     } catch {}
   }
 
   useEffect(() => {
+    if (!id) return;
     let timer: number | undefined;
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        setAlert(await api<AlertItem>(`/${id}`));
+        setAlert(await api<AlertItem>(`/alerts/${id}`));
         loadSightings();
         timer = window.setInterval(loadSightings, 10000);
       } catch (e) {
@@ -50,8 +51,18 @@ export default function AlertDetailPage() {
 
   async function resolve() {
     try {
-      await api(`/${id}/resolve`, { method: "POST" });
+      await api(`/alerts/${id}/resolve`, { method: "POST" });
       setAlert((a) => (a ? { ...a, status: "resolved" } : a));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function remove() {
+    if (!confirm("Ye alert aur is ki photo hamesha ke liye delete karein?")) return;
+    try {
+      await api(`/alerts/${id}`, { method: "DELETE" });
+      router.replace("/alerts");
     } catch (e) {
       setError((e as Error).message);
     }
@@ -59,8 +70,8 @@ export default function AlertDetailPage() {
 
   async function vote(v: "confirm" | "fake") {
     try {
-      await api(`/${id}/vote`, { method: "POST", body: JSON.stringify({ vote: v }) });
-      setAlert(await api<AlertItem>(`/${id}`));
+      await api(`/alerts/${id}/vote`, { method: "POST", body: JSON.stringify({ vote: v }) });
+      setAlert(await api<AlertItem>(`/alerts/${id}`));
     } catch (e) {
       setError((e as Error).message);
     }
@@ -69,7 +80,7 @@ export default function AlertDetailPage() {
   async function sendSighting() {
     if (!pending) return;
     try {
-      await api(`/${id}/sighting`, {
+      await api(`/alerts/${id}/sighting`, {
         method: "POST",
         body: JSON.stringify({ lat: pending[0], lng: pending[1] }),
       });
@@ -171,9 +182,26 @@ export default function AlertDetailPage() {
                 ✅ Masla hal ho gaya (Resolved)
               </button>
             )}
+
+            {alert.mine && (
+              <button
+                onClick={remove}
+                className="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg py-2 text-sm"
+              >
+                🗑️ Ye alert delete karein
+              </button>
+            )}
           </>
         )}
       </div>
     </main>
+  );
+}
+
+export default function AlertDetailPage() {
+  return (
+    <Suspense fallback={null}>
+      <AlertDetail />
+    </Suspense>
   );
 }

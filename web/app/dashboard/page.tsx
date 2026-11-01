@@ -13,6 +13,7 @@ import { unsubscribeFromPush, pushSupported } from "@/lib/push";
 import DetectorPanel from "@/components/DetectorPanel";
 import TelegramConnect from "@/components/TelegramConnect";
 import FamilyFaces from "@/components/FamilyFaces";
+import CameraLink from "@/components/CameraLink";
 
 
 const MapPicker = dynamic(() => import("@/components/MapPicker"), {
@@ -105,6 +106,7 @@ export default function DashboardPage() {
           <button onClick={logout} className="text-sm bg-gray-200 hover:bg-gray-300 rounded-lg px-3 py-1">
             Logout
           </button>
+          
         </div>
         <p className="text-gray-700 text-sm">{user?.email}</p>
 
@@ -157,6 +159,7 @@ export default function DashboardPage() {
   🧑‍🤝‍🧑 Mohalla group
 </Link>
 <DetectorPanel />
+<CameraLink />
         <SendAlert />
         <Link href="/gallery" className="block text-center border rounded-lg py-2 text-sm hover:bg-gray-50">
   📸 Chor ki tasaweer (gallery)
@@ -171,6 +174,8 @@ export default function DashboardPage() {
         <Link href="/heatmap" className="block text-center border rounded-lg py-2 text-sm hover:bg-gray-50">
   🗺️ Ilaqe ka heatmap
 </Link>
+        <p className="text-center text-xs text-gray-400 pt-2">Founder: Ali Hassan</p>
+      
       </div>
     </main>
   );

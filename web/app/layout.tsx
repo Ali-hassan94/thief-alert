@@ -6,6 +6,8 @@ import PWARegister from "@/components/PWARegister";
 export const metadata: Metadata = {
   title: "Thief Alert",
   description: "Apne ilaqe me chor ka alert paayen",
+  authors: [{ name: "Ali Hassan" }],
+  creator: "Ali Hassan",
   appleWebApp: { capable: true, title: "Thief Alert", statusBarStyle: "default" },
 };
 

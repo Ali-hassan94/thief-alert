@@ -1,4 +1,3 @@
-// web/app/alerts/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,7 +16,7 @@ export default function AlertsPage() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace("/login");
       try {
-        setItems(await api<AlertItem[]>(""));
+        setItems(await api<AlertItem[]>("/alerts"));
       } catch (e) {
         setError((e as Error).message);
       }
@@ -29,24 +28,20 @@ export default function AlertsPage() {
       <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">📋 Pichle 7 din ke alerts</h1>
-          <Link href="/dashboard" className="text-sm bg-gray-200 hover:bg-gray-300 rounded-lg px-3 py-1">
-            ← Wapis
-          </Link>
+          <Link href="/dashboard" className="text-sm bg-gray-200 hover:bg-gray-300 rounded-lg px-3 py-1">← Wapis</Link>
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
         {!items && !error && <p className="text-gray-500">Loading...</p>}
-        {items && items.length === 0 && (
-          <p className="text-gray-500">Abhi koi alert nahi. Alhamdulillah! 🙏</p>
-        )}
+        {items && items.length === 0 && <p className="text-gray-500">Abhi koi alert nahi. Alhamdulillah! 🙏</p>}
 
         <ul className="space-y-3">
           {items?.map((a) => (
             <li key={a.id}>
-              <Link href={`/alert/${a.id}`} className="block border rounded-xl p-3 hover:bg-gray-50">
-              {a.photoUrl && (
-  <img src={a.photoUrl} alt="Mushtabah insaan" className="w-full h-40 object-cover rounded-lg mb-2" />
-)}
+              <Link href={`/alert?id=${a.id}`} className="block border rounded-xl p-3 hover:bg-gray-50">
+                {a.photoUrl && (
+                  <img src={a.photoUrl} alt="Mushtabah insaan" className="w-full h-40 object-cover rounded-lg mb-2" />
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <span className={a.status === "active" ? "text-red-600 font-semibold" : "text-green-600 font-semibold"}>
                     {a.status === "active" ? "🔴 Active" : "🟢 Resolved"}

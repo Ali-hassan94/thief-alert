@@ -9,7 +9,6 @@ import { familyMatch } from "@/lib/faces";
 export default function DetectorPanel() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const timer = useRef<number | null>(null);
-  const beatTimer = useRef<number | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const wake = useRef<any>(null);
   const hits = useRef(0);
@@ -68,21 +67,6 @@ export default function DetectorPanel() {
     }, seconds * 1000);
   }
 
-  async function beat() {
-    let battery: number | null = null;
-    let charging: boolean | null = null;
-    try {
-      const b = await (navigator as any).getBattery?.();
-      if (b) {
-        battery = Math.round(b.level * 100);
-        charging = b.charging;
-      }
-    } catch {}
-    try {
-      await api("/api/device/heartbeat", { method: "POST", body: JSON.stringify({ battery, charging }) });
-    } catch {}
-  }
-
   async function trigger() {
     const { data } = await supabase.rpc("get_my_zone");
     if (!data || data.length === 0) {
@@ -91,7 +75,7 @@ export default function DetectorPanel() {
     }
     const photoUrl = await snapshot();
     try {
-    const res = await api<{ notified: number; filtered?: boolean }>("/alerts", {
+      const res = await api<{ notified: number; filtered?: boolean }>("/alerts", {
         method: "POST",
         body: JSON.stringify({
           lat: data[0].lat,
@@ -130,9 +114,6 @@ export default function DetectorPanel() {
       setRunning(true);
       setStatus("👁️ Nigrani chal rahi hai...");
 
-      beat();
-      beatTimer.current = window.setInterval(beat, 60000);
-
       timer.current = window.setInterval(async () => {
         if (busy.current) return;
         busy.current = true;
@@ -149,7 +130,7 @@ export default function DetectorPanel() {
             const who = await familyMatch(v);
             if (who) {
               hits.current = 0;
-              lastSent.current = Date.now() - 100000; // 20 second baad dobara dekhe
+              lastSent.current = Date.now() - 100000;
               setStatus(`🏠 Ghar ka fard pehchana: ${who}. Alert nahi bheja.`);
               return;
             }
@@ -172,11 +153,6 @@ export default function DetectorPanel() {
 
   function stop() {
     if (timer.current) clearInterval(timer.current);
-    if (beatTimer.current) {
-      clearInterval(beatTimer.current);
-      beatTimer.current = null;
-      api("/api/device/disarm", { method: "POST" }).catch(() => {});
-    }
     stream.current?.getTracks().forEach((t) => t.stop());
     wake.current?.release?.();
     setRunning(false);
